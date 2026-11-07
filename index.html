@@ -429,5 +429,112 @@ searchWeb.addEventListener("click", () => {
   }
 });
 </script>
+<script>
+/* VOZ DE J.A.R.V.I.S. */
+
+let vozActivada = true;
+
+function hablarJarvis(texto) {
+  if (!vozActivada || !("speechSynthesis" in window)) return;
+
+  window.speechSynthesis.cancel();
+
+  const voz = new SpeechSynthesisUtterance(texto);
+  voz.lang = "es-ES";
+  voz.rate = 0.95;
+  voz.pitch = 0.85;
+
+  const voces = window.speechSynthesis.getVoices();
+
+  const espanola = voces.find(v =>
+    v.lang.toLowerCase() === "es-es"
+  );
+
+  const masculina = voces.find(v =>
+    /male|masculino|hombre/i.test(v.name)
+  );
+
+  voz.voice = masculina || espanola || null;
+
+  window.speechSynthesis.speak(voz);
+}
+
+/* ACTIVAR Y DESACTIVAR VOZ */
+
+const botonVoz = document.createElement("button");
+botonVoz.className = "voice";
+botonVoz.textContent = "🔊 Respuestas habladas: activadas";
+
+botonVoz.onclick = () => {
+  vozActivada = !vozActivada;
+
+  botonVoz.textContent = vozActivada
+    ? "🔊 Respuestas habladas: activadas"
+    : "🔇 Respuestas habladas: desactivadas";
+
+  if (!vozActivada) {
+    window.speechSynthesis.cancel();
+  }
+};
+
+/* MICROFONO DEL CHAT */
+
+const botonMicro = document.createElement("button");
+botonMicro.className = "voice";
+botonMicro.textContent = "🎙️ Hablar con J.A.R.V.I.S.";
+
+const Reconocimiento =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+if (Reconocimiento) {
+  botonMicro.onclick = () => {
+    const reconocimiento = new Reconocimiento();
+
+    reconocimiento.lang = "es-ES";
+    reconocimiento.interimResults = false;
+
+    botonMicro.textContent = "🎙️ Escuchando...";
+
+    reconocimiento.onresult = evento => {
+      chatInput.value =
+        evento.results[0][0].transcript;
+
+      sendMessage();
+    };
+
+    reconocimiento.onerror = () => {
+      chatReply("No he podido reconocer su voz, señor.");
+    };
+
+    reconocimiento.onend = () => {
+      botonMicro.textContent =
+        "🎙️ Hablar con J.A.R.V.I.S.";
+    };
+
+    reconocimiento.start();
+  };
+} else {
+  botonMicro.disabled = true;
+  botonMicro.textContent = "Micrófono no disponible";
+}
+
+/* COLOCAR LOS BOTONES EN EL CHAT */
+
+const chat = document.getElementById("jarvisChat");
+
+chat.appendChild(botonMicro);
+chat.appendChild(botonVoz);
+
+/* CONECTAR LAS RESPUESTAS A LA VOZ */
+
+const respuestaOriginal = chatReply;
+
+chatReply = function(texto) {
+  respuestaOriginal(texto);
+  hablarJarvis(texto);
+};
+
+</script>
 </body>
 </html>
