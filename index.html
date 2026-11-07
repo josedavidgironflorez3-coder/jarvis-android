@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <meta name="description" content="Interfaz personal de J.A.R.V.I.S.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <title>J.A.R.V.I.S.</title>
+  <style>
+    :root{color-scheme:dark;--cyan:#39d9ff;--blue:#168cff;--muted:#8aa5bb}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 34%,#102b46 0,#07111f 42%,#030811 100%);color:#eaf8ff;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+    header{padding:26px 22px 10px;text-align:center;letter-spacing:.22em;font-weight:700;color:var(--cyan);text-shadow:0 0 16px #168cff}
+    .status{text-align:center;color:#9cb7c9;font-size:12px;letter-spacing:.12em}
+    main{max-width:520px;margin:auto;padding:20px}
+    .greeting{text-align:center;margin:24px 0 6px;font-size:25px;font-weight:600}
+    .sub{text-align:center;color:var(--muted);font-size:13px}
+    .core-wrap{display:grid;place-items:center;padding:30px 0}
+    .core{width:214px;height:214px;border-radius:50%;border:1px solid #39d9ff88;display:grid;place-items:center;position:relative;box-shadow:0 0 24px #168cff66,inset 0 0 32px #168cff33}
+    .core:before,.core:after{content:"";position:absolute;border:1px solid #39d9ff66;border-radius:50%;inset:12px}
+    .core:after{inset:27px;border-style:dashed;animation:spin 22s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .orb{width:112px;height:112px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#d8fbff,#39d9ff 24%,#0874c9 55%,#061b38 78%);box-shadow:0 0 28px #39d9ff99;display:grid;place-items:center;font-size:38px;color:#031322}
+    .mic{margin-top:14px;border:1px solid #39d9ff88;background:#0b2941;color:#eaf8ff;border-radius:24px;padding:11px 20px;font-size:14px}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .tile,.panel{border:1px solid #1b5473;background:#091b2bda;border-radius:14px;padding:17px}
+    .tile{min-height:82px;text-align:left;color:#eaf8ff;font-size:15px}
+    .tile span{display:block;color:var(--cyan);font-size:12px;margin-bottom:7px;letter-spacing:.08em}
+    .panel{margin-top:14px;color:var(--muted);font-size:13px;line-height:1.5}
+    .modes{display:flex;gap:8px;margin-top:10px}
+    .mode{flex:1;border:1px solid #28516c;border-radius:10px;padding:10px;text-align:center;color:#b7d1e2;background:#081522}
+    .mode.active{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 12px #168cff33}
+    footer{text-align:center;color:#58758b;font-size:11px;padding:25px}
+    button{font:inherit;cursor:pointer}
+  </style>
+</head>
+<body>
+  <header>J.A.R.V.I.S.</header>
+  <div class="status">PERSONAL AI SYSTEM · PROTOTIPO 0.1</div>
+  <main>
+    <div class="greeting">Hola, señor.</div>
+    <div class="sub">¿En qué puedo ayudarle hoy?</div>
+    <section class="core-wrap">
+      <div class="core"><div class="orb">✦</div></div>
+      <button class="mic" id="mic">◉ &nbsp; Interfaz de voz (próximamente)</button>
+    </section>
+    <section class="grid">
+      <button class="tile" data-panel="Agenda"><span>01 / ORGANIZACIÓN</span>▦ &nbsp; Agenda</button>
+      <button class="tile" data-panel="Tareas"><span>02 / PENDIENTES</span>✓ &nbsp; Tareas</button>
+      <button class="tile" data-panel="Herramientas"><span>03 / SISTEMA</span>⌘ &nbsp; Herramientas</button>
+      <button class="tile" data-panel="Estadísticas"><span>04 / ESTADO</span>◫ &nbsp; Estadísticas</button>
+    </section>
+    <section class="panel" id="info">
+      <strong style="color:#39d9ff">ESTADO DEL SISTEMA</strong><br>
+      Interfaz cargada correctamente. Los modelos de IA y las funciones del teléfono aún no están conectados.
+      <div class="modes">
+        <button class="mode active" id="offline">◉ Offline</button>
+        <button class="mode" id="online">◎ Online</button>
+      </div>
+      <div id="modeinfo" style="margin-top:9px">Modo seleccionado: interfaz local de demostración.</div>
+    </section>
+  </main>
+  <footer>J.A.R.V.I.S. · Construido por fases</footer>
+  <script>
+    const info=document.getElementById('info');
+    document.querySelectorAll('[data-panel]').forEach(b=>b.addEventListener('click',()=>{
+      info.querySelector('strong').textContent=b.dataset.panel.toUpperCase();
+      info.childNodes[2].textContent=' Este apartado es una maqueta visual. Lo conectaremos en una siguiente fase.';
+    }));
+    document.getElementById('mic').addEventListener('click',()=>alert('La función de voz todavía no está conectada.'));
+    const modeinfo=document.getElementById('modeinfo');
+    function setMode(which){
+      document.getElementById('offline').classList.toggle('active',which==='offline');
+      document.getElementById('online').classList.toggle('active',which==='online');
+      modeinfo.textContent=which==='offline'?'Modo seleccionado: interfaz local de demostración.':'Modo seleccionado: conexión online pendiente de configurar.';
+    }
+    document.getElementById('offline').onclick=()=>setMode('offline');
+    document.getElementById('online').onclick=()=>setMode('online');
+    if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+  </script>
+</body>
+</html>
