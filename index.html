@@ -1,83 +1,296 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#07111f">
-  <meta name="description" content="Interfaz personal de J.A.R.V.I.S.">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icons/icon-192.png">
+  <meta name="description" content="J.A.R.V.I.S. - Asistente personal">
   <title>J.A.R.V.I.S.</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon-192.png">
   <style>
-    :root{color-scheme:dark;--cyan:#39d9ff;--blue:#168cff;--muted:#8aa5bb}
-    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 34%,#102b46 0,#07111f 42%,#030811 100%);color:#eaf8ff;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
-    header{padding:26px 22px 10px;text-align:center;letter-spacing:.22em;font-weight:700;color:var(--cyan);text-shadow:0 0 16px #168cff}
-    .status{text-align:center;color:#9cb7c9;font-size:12px;letter-spacing:.12em}
-    main{max-width:520px;margin:auto;padding:20px}
-    .greeting{text-align:center;margin:24px 0 6px;font-size:25px;font-weight:600}
-    .sub{text-align:center;color:var(--muted);font-size:13px}
-    .core-wrap{display:grid;place-items:center;padding:30px 0}
-    .core{width:214px;height:214px;border-radius:50%;border:1px solid #39d9ff88;display:grid;place-items:center;position:relative;box-shadow:0 0 24px #168cff66,inset 0 0 32px #168cff33}
-    .core:before,.core:after{content:"";position:absolute;border:1px solid #39d9ff66;border-radius:50%;inset:12px}
-    .core:after{inset:27px;border-style:dashed;animation:spin 22s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .orb{width:112px;height:112px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#d8fbff,#39d9ff 24%,#0874c9 55%,#061b38 78%);box-shadow:0 0 28px #39d9ff99;display:grid;place-items:center;font-size:38px;color:#031322}
-    .mic{margin-top:14px;border:1px solid #39d9ff88;background:#0b2941;color:#eaf8ff;border-radius:24px;padding:11px 20px;font-size:14px}
-    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-    .tile,.panel{border:1px solid #1b5473;background:#091b2bda;border-radius:14px;padding:17px}
-    .tile{min-height:82px;text-align:left;color:#eaf8ff;font-size:15px}
-    .tile span{display:block;color:var(--cyan);font-size:12px;margin-bottom:7px;letter-spacing:.08em}
-    .panel{margin-top:14px;color:var(--muted);font-size:13px;line-height:1.5}
-    .modes{display:flex;gap:8px;margin-top:10px}
-    .mode{flex:1;border:1px solid #28516c;border-radius:10px;padding:10px;text-align:center;color:#b7d1e2;background:#081522}
-    .mode.active{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 12px #168cff33}
-    footer{text-align:center;color:#58758b;font-size:11px;padding:25px}
-    button{font:inherit;cursor:pointer}
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #102b45, #050b14 65%);
+      color: #eaf8ff;
+      font-family: Arial, sans-serif;
+      padding: 22px;
+    }
+    .app { max-width: 600px; margin: auto; }
+    header { text-align: center; margin: 20px 0 28px; }
+    h1 {
+      color: #53dfff;
+      letter-spacing: 5px;
+      font-size: 30px;
+      margin-bottom: 8px;
+      text-shadow: 0 0 18px #16bde9;
+    }
+    .status { color: #80a9bd; font-size: 12px; letter-spacing: 2px; }
+    .orb {
+      width: 130px;
+      height: 130px;
+      border: 2px solid #43d9ff;
+      border-radius: 50%;
+      margin: 28px auto;
+      display: grid;
+      place-items: center;
+      color: #69e5ff;
+      font-size: 42px;
+      box-shadow: 0 0 25px #13bde955, inset 0 0 25px #13bde933;
+      animation: pulse 3s infinite ease-in-out;
+    }
+    @keyframes pulse {
+      50% { box-shadow: 0 0 40px #13bde988, inset 0 0 35px #13bde966; }
+    }
+    .panel {
+      background: #0b1b2bdb;
+      border: 1px solid #1b7895;
+      border-radius: 15px;
+      padding: 18px;
+      margin: 16px 0;
+      box-shadow: 0 0 18px #008db51a;
+    }
+    h2 { color: #58dfff; font-size: 18px; margin-top: 0; }
+    .greeting { text-align: center; color: #c8e8f5; }
+    .input-row { display: flex; gap: 8px; }
+    input {
+      min-width: 0;
+      flex: 1;
+      background: #071321;
+      border: 1px solid #27617a;
+      border-radius: 9px;
+      padding: 13px;
+      color: white;
+      font-size: 15px;
+    }
+    button {
+      background: #0b789b;
+      border: 1px solid #4bdcff;
+      color: white;
+      border-radius: 9px;
+      padding: 12px 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:active { opacity: .7; }
+    .voice {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      background: #102c43;
+    }
+    .task {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid #1b394d;
+    }
+    .task:last-child { border-bottom: 0; }
+    .task input { flex: none; width: 19px; height: 19px; }
+    .task span { flex: 1; overflow-wrap: anywhere; }
+    .done { text-decoration: line-through; opacity: .5; }
+    .delete {
+      padding: 7px 10px;
+      background: #48232c;
+      border-color: #a84b5c;
+    }
+    .small { color: #83a9ba; font-size: 12px; }
+    .empty { color: #83a9ba; text-align: center; padding: 15px 0; }
+    .tools { display: flex; gap: 9px; flex-wrap: wrap; }
+    .tools button { flex: 1; }
+    footer { text-align: center; color: #52788c; font-size: 11px; margin: 30px 0 10px; }
   </style>
 </head>
 <body>
-  <header>J.A.R.V.I.S.</header>
-  <div class="status">PERSONAL AI SYSTEM · PROTOTIPO 0.1</div>
-  <main>
-    <div class="greeting">Hola, señor.</div>
-    <div class="sub">¿En qué puedo ayudarle hoy?</div>
-    <section class="core-wrap">
-      <div class="core"><div class="orb">✦</div></div>
-      <button class="mic" id="mic">◉ &nbsp; Interfaz de voz (próximamente)</button>
+  <main class="app">
+    <header>
+      <h1>J.A.R.V.I.S.</h1>
+      <div class="status">PERSONAL ASSISTANT · SYSTEM ONLINE</div>
+    </header>
+
+    <div class="greeting">Hola, señor. ¿En qué puedo ayudarle?</div>
+    <div class="orb">J</div>
+
+    <section class="panel">
+      <h2>Agenda personal</h2>
+      <p id="message">Todos los sistemas preparados.</p>
+      <p class="small">Sus tareas se guardan en este dispositivo.</p>
     </section>
-    <section class="grid">
-      <button class="tile" data-panel="Agenda"><span>01 / ORGANIZACIÓN</span>▦ &nbsp; Agenda</button>
-      <button class="tile" data-panel="Tareas"><span>02 / PENDIENTES</span>✓ &nbsp; Tareas</button>
-      <button class="tile" data-panel="Herramientas"><span>03 / SISTEMA</span>⌘ &nbsp; Herramientas</button>
-      <button class="tile" data-panel="Estadísticas"><span>04 / ESTADO</span>◫ &nbsp; Estadísticas</button>
-    </section>
-    <section class="panel" id="info">
-      <strong style="color:#39d9ff">ESTADO DEL SISTEMA</strong><br>
-      Interfaz cargada correctamente. Los modelos de IA y las funciones del teléfono aún no están conectados.
-      <div class="modes">
-        <button class="mode active" id="offline">◉ Offline</button>
-        <button class="mode" id="online">◎ Online</button>
+
+    <section class="panel" id="tasks">
+      <h2>Mis tareas</h2>
+      <div class="input-row">
+        <input id="taskInput" type="text" placeholder="Ej. Estudiar inglés para el lunes">
+        <button id="addButton">Añadir</button>
       </div>
-      <div id="modeinfo" style="margin-top:9px">Modo seleccionado: interfaz local de demostración.</div>
+      <button class="voice" id="voiceButton">🎙️ Añadir tarea por voz</button>
+      <p class="small" id="voiceStatus">Pulsa el botón para dictar una tarea.</p>
+      <div id="taskList"></div>
+      <div class="tools">
+        <button id="clearButton">Borrar completadas</button>
+      </div>
     </section>
+
+    <section class="panel">
+      <h2>Estado del sistema</h2>
+      <p>✓ Interfaz de J.A.R.V.I.S. activa</p>
+      <p>✓ Almacenamiento local activado</p>
+      <p id="voiceInfo">🎙️ Comprobando reconocimiento de voz...</p>
+      <p class="small">La conexión con una IA avanzada y las funciones del móvil todavía están pendientes.</p>
+    </section>
+
+    <footer>J.A.R.V.I.S. · PROYECTO PERSONAL</footer>
   </main>
-  <footer>J.A.R.V.I.S. · Construido por fases</footer>
+
   <script>
-    const info=document.getElementById('info');
-    document.querySelectorAll('[data-panel]').forEach(b=>b.addEventListener('click',()=>{
-      info.querySelector('strong').textContent=b.dataset.panel.toUpperCase();
-      info.childNodes[2].textContent=' Este apartado es una maqueta visual. Lo conectaremos en una siguiente fase.';
-    }));
-    document.getElementById('mic').addEventListener('click',()=>alert('La función de voz todavía no está conectada.'));
-    const modeinfo=document.getElementById('modeinfo');
-    function setMode(which){
-      document.getElementById('offline').classList.toggle('active',which==='offline');
-      document.getElementById('online').classList.toggle('active',which==='online');
-      modeinfo.textContent=which==='offline'?'Modo seleccionado: interfaz local de demostración.':'Modo seleccionado: conexión online pendiente de configurar.';
+    const STORAGE_KEY = "jarvis_tasks_v02";
+    let tasks = [];
+
+    try {
+      tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    } catch (error) {
+      tasks = [];
     }
-    document.getElementById('offline').onclick=()=>setMode('offline');
-    document.getElementById('online').onclick=()=>setMode('online');
-    if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+
+    const input = document.getElementById("taskInput");
+    const list = document.getElementById("taskList");
+    const message = document.getElementById("message");
+    const voiceStatus = document.getElementById("voiceStatus");
+
+    function saveTasks() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    }
+
+    function renderTasks() {
+      list.replaceChildren();
+
+      if (tasks.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "empty";
+        empty.textContent = "No tienes tareas pendientes, señor.";
+        list.appendChild(empty);
+      }
+
+      tasks.forEach((task, index) => {
+        const row = document.createElement("div");
+        row.className = "task";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = task.done;
+        checkbox.setAttribute("aria-label", "Marcar tarea como completada");
+        checkbox.addEventListener("change", () => {
+          tasks[index].done = checkbox.checked;
+          saveTasks();
+          renderTasks();
+        });
+
+        const label = document.createElement("span");
+        label.textContent = task.text;
+        if (task.done) label.className = "done";
+
+        const remove = document.createElement("button");
+        remove.className = "delete";
+        remove.textContent = "✕";
+        remove.setAttribute("aria-label", "Eliminar tarea");
+        remove.addEventListener("click", () => {
+          tasks.splice(index, 1);
+          saveTasks();
+          renderTasks();
+        });
+
+        row.append(checkbox, label, remove);
+        list.appendChild(row);
+      });
+
+      const pending = tasks.filter(task => !task.done).length;
+      message.textContent = pending === 0
+        ? "No hay tareas pendientes."
+        : "Tiene " + pending + " tarea(s) pendiente(s).";
+    }
+
+    function addTask(text) {
+      const cleanText = text.trim();
+      if (!cleanText) return;
+
+      tasks.push({ text: cleanText, done: false });
+      saveTasks();
+      renderTasks();
+      input.value = "";
+      input.focus();
+    }
+
+    document.getElementById("addButton").addEventListener("click", () => {
+      addTask(input.value);
+    });
+
+    input.addEventListener("keydown", event => {
+      if (event.key === "Enter") addTask(input.value);
+    });
+
+    document.getElementById("clearButton").addEventListener("click", () => {
+      tasks = tasks.filter(task => !task.done);
+      saveTasks();
+      renderTasks();
+    });
+
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const voiceButton = document.getElementById("voiceButton");
+    const voiceInfo = document.getElementById("voiceInfo");
+
+    if (SpeechRecognition) {
+      voiceInfo.textContent = "✓ Reconocimiento de voz disponible";
+      voiceButton.addEventListener("click", () => {
+        const recognition = new SpeechRecognition();
+        recognition.lang = "es-ES";
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        voiceStatus.textContent = "Escuchando... Hable ahora.";
+        voiceButton.disabled = true;
+
+        recognition.onresult = event => {
+          let spoken = event.results[0][0].transcript.trim();
+          spoken = spoken.replace(
+            /^(jarvis[\s,]*)?(añade|añadir|apunta|anota|recuerda|tengo que)\s*/i,
+            ""
+          );
+          if (spoken) {
+            addTask(spoken);
+            voiceStatus.textContent = "Tarea guardada correctamente.";
+          } else {
+            voiceStatus.textContent = "No he reconocido ninguna tarea.";
+          }
+        };
+
+        recognition.onerror = () => {
+          voiceStatus.textContent = "No se ha podido reconocer la voz. Comprueba el permiso del micrófono.";
+        };
+
+        recognition.onend = () => {
+          voiceButton.disabled = false;
+        };
+
+        recognition.start();
+      });
+    } else {
+      voiceButton.disabled = true;
+      voiceButton.textContent = "Reconocimiento de voz no disponible";
+      voiceInfo.textContent = "El navegador no ofrece reconocimiento de voz.";
+      voiceStatus.textContent = "Puedes añadir tus tareas escribiéndolas.";
+    }
+
+    renderTasks();
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    }
   </script>
 </body>
 </html>
