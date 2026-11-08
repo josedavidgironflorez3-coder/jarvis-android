@@ -9,13 +9,21 @@ const FILES = [
   './icon-512.png'
 ];
 
+// Instalar nueva versión
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE).then(cache => cache.addAll(FILES))
   );
-  self.skipWaiting();
 });
 
+// Activar solo cuando el usuario lo autorice
+self.addEventListener('message', event => {
+  if (event.data === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+// Limpiar cachés antiguas
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -23,11 +31,11 @@ self.addEventListener('activate', event => {
         keys.filter(key => key !== CACHE)
           .map(key => caches.delete(key))
       )
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
+// Gestionar archivos de la aplicación
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
