@@ -316,6 +316,11 @@ save.addEventListener("click", () => {
 
     const voiceButton = document.getElementById("voiceButton");
     const voiceInfo = document.getElementById("voiceInfo");
+    if (!voiceInfo) {
+  const info = document.createElement("p");
+  info.id = "voiceInfo";
+  voiceButton.insertAdjacentElement("afterend", info);
+    }
 
     if (SpeechRecognition) {
       voiceInfo.textContent = "✓ Reconocimiento de voz disponible";
