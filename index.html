@@ -363,79 +363,135 @@ save.addEventListener("click", () => {
 
     
 if ("serviceWorker" in navigator) {
-  let recargarTrasActualizar = false;
+  let registroJarvis = null;
 
-  function mostrarAvisoActualizacion(registration) {
-    if (document.getElementById("jarvisUpdateNotice")) return;
+  const diagnostico = document.createElement("section");
+  diagnostico.id = "jarvisDiagnostic";
+  diagnostico.style.cssText = `
+    position:fixed;
+    bottom:15px;
+    left:12px;
+    right:12px;
+    z-index:99999;
+    padding:16px;
+    border-radius:14px;
+    background:#10243a;
+    color:white;
+    border:1px solid #43d9ff;
+    font-family:Arial,sans-serif;
+  `;
 
-    const aviso = document.createElement("div");
-    aviso.id = "jarvisUpdateNotice";
-    aviso.style.cssText = `
-      position:fixed;
-      bottom:20px;
-      left:12px;
-      right:12px;
-      z-index:99999;
-      padding:18px;
-      border-radius:16px;
-      background:#10243a;
-      color:white;
-      box-shadow:0 5px 25px #0008;
-      text-align:center;
-    `;
+  diagnostico.innerHTML = `
+    <strong>🤖 Sistema de actualizaciones</strong>
+    <p id="jarvisDiagnosticStatus">
+      Comprobando sistema...
+    </p>
+    <button id="jarvisCheckUpdate">
+      Comprobar actualización
+    </button>
+  `;
 
-    const titulo = document.createElement("strong");
-    titulo.textContent = "✨ Nueva actualización disponible";
+  document.body.appendChild(diagnostico);
 
-    const texto = document.createElement("p");
-    texto.textContent = "Hay una nueva versión de J.A.R.V.I.S.";
+  const estado = document.getElementById(
+    "jarvisDiagnosticStatus"
+  );
 
-    const boton = document.createElement("button");
-    boton.textContent = "Actualizar ahora";
-    boton.style.cssText =
-      "padding:12px 20px;border:0;border-radius:10px;background:#16a085;color:white;font-weight:bold;";
-
-    boton.addEventListener("click", () => {
-      if (!registration.waiting) return;
-      boton.textContent = "Actualizando...";
-      boton.disabled = true;
-      recargarTrasActualizar = true;
-      registration.waiting.postMessage("SKIP_WAITING");
-    });
-
-    aviso.append(titulo, texto, boton);
-    document.body.appendChild(aviso);
+  function informar(mensaje) {
+    estado.textContent = mensaje;
   }
 
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (recargarTrasActualizar) {
+  navigator.serviceWorker.addEventListener(
+    "controllerchange",
+    () => {
+      informar("Actualización activada. Recargando...");
       window.location.reload();
     }
-  });
+  );
 
-  navigator.serviceWorker.register("./sw.js").then(registration => {
-    if (registration.waiting && navigator.serviceWorker.controller) {
-      mostrarAvisoActualizacion(registration);
-    }
+  navigator.serviceWorker.register("./sw.js")
+    .then(registration => {
+      registroJarvis = registration;
 
-    registration.addEventListener("updatefound", () => {
-      const nuevo = registration.installing;
-      if (!nuevo) return;
+      informar(
+        "Registro correcto. Controlador: " +
+        (navigator.serviceWorker.controller
+          ? "Activo"
+          : "No activo todavía")
+      );
 
-      nuevo.addEventListener("statechange", () => {
-        if (
-          nuevo.state === "installed" &&
-          navigator.serviceWorker.controller
-        ) {
-          mostrarAvisoActualizacion(registration);
+      function comprobarEstado() {
+        if (registration.waiting) {
+          informar(
+            "¡Nueva versión esperando! Pulsa actualizar."
+          );
+
+          const boton = document.getElementById(
+            "jarvisCheckUpdate"
+          );
+
+          boton.textContent = "Actualizar ahora";
+
+          boton.onclick = () => {
+            registration.waiting.postMessage(
+              "SKIP_WAITING"
+            );
+            informar("Activando nueva versión...");
+          };
         }
-      });
-    });
+      }
 
-    registration.update().catch(() => {});
-  }).catch(error => {
-    console.error("Error actualizando J.A.R.V.I.S.:", error);
-  });
+      comprobarEstado();
+
+      registration.addEventListener(
+        "updatefound",
+        () => {
+          const nuevo = registration.installing;
+
+          if (!nuevo) return;
+
+          informar("Descargando nueva versión...");
+
+          nuevo.addEventListener("statechange", () => {
+            informar(
+              "Estado de instalación: " + nuevo.state
+            );
+
+            comprobarEstado();
+          });
+        }
+      );
+
+      document.getElementById(
+        "jarvisCheckUpdate"
+      ).onclick = () => {
+        informar("Buscando actualizaciones...");
+
+        registration.update()
+          .then(() => {
+            comprobarEstado();
+
+            if (!registration.waiting &&
+                !registration.installing) {
+              informar(
+                "Comprobación terminada. No hay una actualización pendiente."
+              );
+            }
+          })
+          .catch(error => {
+            informar("Error: " + error.message);
+          });
+      };
+
+      registration.update().catch(error => {
+        informar("Error al comprobar: " + error.message);
+      });
+    })
+    .catch(error => {
+      informar("Error al registrar: " + error.message);
+    });
+} else {
+  alert("Este navegador no admite Service Workers.");
 }
 
   </script>
