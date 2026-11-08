@@ -1,5 +1,5 @@
 
-const CACHE = 'jarvis-v05';
+const CACHE = 'jarvis-v06';
 
 const FILES = [
   './',
