@@ -315,12 +315,13 @@ save.addEventListener("click", () => {
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
     const voiceButton = document.getElementById("voiceButton");
-    const voiceInfo = document.getElementById("voiceInfo");
-    if (!voiceInfo) {
-  const info = document.createElement("p");
-  info.id = "voiceInfo";
-  voiceButton.insertAdjacentElement("afterend", info);
-    }
+    let voiceInfo = document.getElementById("voiceInfo");
+
+if (!voiceInfo) {
+  voiceInfo = document.createElement("p");
+  voiceInfo.id = "voiceInfo";
+  voiceButton.insertAdjacentElement("afterend", voiceInfo);
+}
 
     if (SpeechRecognition) {
       voiceInfo.textContent = "✓ Reconocimiento de voz disponible";
