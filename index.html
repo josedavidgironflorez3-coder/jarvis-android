@@ -156,53 +156,119 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
     }
 
-    function renderTasks() {
-      list.replaceChildren();
+  
+function renderTasks() {
+  list.replaceChildren();
 
-      if (tasks.length === 0) {
-        const empty = document.createElement("p");
-        empty.className = "empty";
-        empty.textContent = "No tienes tareas pendientes, señor.";
-        list.appendChild(empty);
+  if (tasks.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty";
+    empty.textContent = "No tienes tareas pendientes.";
+    list.appendChild(empty);
+  }
+
+  tasks.forEach((task, index) => {
+    const row = document.createElement("div");
+    row.className = "task";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = task.done;
+    checkbox.setAttribute("aria-label", "Marcar tarea");
+    checkbox.addEventListener("change", () => {
+      tasks[index].done = checkbox.checked;
+      saveTasks();
+      renderTasks();
+    });
+
+    const label = document.createElement("span");
+    label.textContent = task.text;
+    if (task.done) label.className = "done";
+
+    const remove = document.createElement("button");
+    remove.className = "delete";
+    remove.textContent = "×";
+    remove.setAttribute("aria-label", "Eliminar tarea");
+    remove.addEventListener("click", () => {
+      tasks.splice(index, 1);
+      saveTasks();
+      renderTasks();
+    });
+
+    row.append(checkbox, label, remove);
+    list.appendChild(row);
+
+    const reminder = document.createElement("div");
+    reminder.style.cssText =
+      "margin:8px 0 16px 28px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;";
+
+    const schedule = document.createElement("button");
+    schedule.textContent = "🔔 Programar aviso";
+
+    const date = document.createElement("input");
+    date.type = "date";
+    date.style.cssText = "padding:8px;";
+
+    const time = document.createElement("input");
+    time.type = "time";
+    time.style.cssText = "padding:8px;";
+
+    const save = document.createElement("button");
+    save.textContent = "Guardar recordatorio";
+    save.style.display = "none";
+
+    date.style.display = "none";
+    time.style.display = "none";
+
+    schedule.addEventListener("click", () => {
+      date.style.display = "inline-block";
+      time.style.display = "inline-block";
+      save.style.display = "inline-block";
+      schedule.style.display = "none";
+    });
+
+    save.addEventListener("click", () => {
+      if (!date.value || !time.value) {
+        alert("Selecciona el día y la hora.");
+        return;
       }
 
-      tasks.forEach((task, index) => {
-        const row = document.createElement("div");
-        row.className = "task";
+      const start = new Date(date.value + "T" + time.value);
+      if (isNaN(start.getTime()) || start <= new Date()) {
+        alert("Elige una fecha y hora futuras.");
+        return;
+      }
 
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.checked = task.done;
-        checkbox.setAttribute("aria-label", "Marcar tarea como completada");
-        checkbox.addEventListener("change", () => {
-          tasks[index].done = checkbox.checked;
-          saveTasks();
-          renderTasks();
-        });
+      const end = new Date(start.getTime() + 30 * 60000);
 
-        const label = document.createElement("span");
-        label.textContent = task.text;
-        if (task.done) label.className = "done";
+      function formatDate(d) {
+        return d.getFullYear() +
+          String(d.getMonth() + 1).padStart(2, "0") +
+          String(d.getDate()).padStart(2, "0") +
+          "T" +
+          String(d.getHours()).padStart(2, "0") +
+          String(d.getMinutes()).padStart(2, "0") +
+          "00";
+      }
 
-        const remove = document.createElement("button");
-        remove.className = "delete";
-        remove.textContent = "✕";
-        remove.setAttribute("aria-label", "Eliminar tarea");
-        remove.addEventListener("click", () => {
-          tasks.splice(index, 1);
-          saveTasks();
-          renderTasks();
-        });
+      const url = "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+        "&text=" + encodeURIComponent("J.A.R.V.I.S. - " + task.text) +
+        "&dates=" + formatDate(start) + "/" + formatDate(end) +
+        "&details=" + encodeURIComponent("Recordatorio creado desde J.A.R.V.I.S.");
 
-        row.append(checkbox, label, remove);
-        list.appendChild(row);
-      });
+      window.location.href = url;
+    });
 
-      const pending = tasks.filter(task => !task.done).length;
-      message.textContent = pending === 0
-        ? "No hay tareas pendientes."
-        : "Tiene " + pending + " tarea(s) pendiente(s).";
-    }
+    reminder.append(schedule, date, time, save);
+    list.appendChild(reminder);
+  });
+
+  const pending = tasks.filter(task => !task.done).length;
+  message.textContent = pending === 0
+    ? "No hay tareas pendientes."
+    : "Tienes " + pending + " tarea(s) pendiente(s).";
+                }
+    
 
     function addTask(text) {
       const cleanText = text.trim();
