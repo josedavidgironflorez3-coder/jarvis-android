@@ -203,7 +203,9 @@ function renderTasks() {
       "margin:8px 0 16px 28px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;";
 
     const schedule = document.createElement("button");
-    schedule.textContent = "🔔 Programar aviso";
+    schedule.textContent = task.reminder
+  ? "🕓 Evento preparado"
+  : "🔔 Programar aviso";
 
     const date = document.createElement("input");
     date.type = "date";
@@ -227,37 +229,50 @@ function renderTasks() {
       schedule.style.display = "none";
     });
 
-    save.addEventListener("click", () => {
-      if (!date.value || !time.value) {
-        alert("Selecciona el día y la hora.");
-        return;
-      }
+    
+save.addEventListener("click", () => {
+  if (!date.value || !time.value) {
+    alert("Selecciona el día y la hora.");
+    return;
+  }
 
-      const start = new Date(date.value + "T" + time.value);
-      if (isNaN(start.getTime()) || start <= new Date()) {
-        alert("Elige una fecha y hora futuras.");
-        return;
-      }
+  const start = new Date(date.value + "T" + time.value);
 
-      const end = new Date(start.getTime() + 30 * 60000);
+  if (isNaN(start.getTime()) || start <= new Date()) {
+    alert("Elige una fecha y hora futuras.");
+    return;
+  }
 
-      function formatDate(d) {
-        return d.getFullYear() +
-          String(d.getMonth() + 1).padStart(2, "0") +
-          String(d.getDate()).padStart(2, "0") +
-          "T" +
-          String(d.getHours()).padStart(2, "0") +
-          String(d.getMinutes()).padStart(2, "0") +
-          "00";
-      }
+  const end = new Date(start.getTime() + 30 * 60000);
 
-      const url = "https://calendar.google.com/calendar/render?action=TEMPLATE" +
-        "&text=" + encodeURIComponent("J.A.R.V.I.S. - " + task.text) +
-        "&dates=" + formatDate(start) + "/" + formatDate(end) +
-        "&details=" + encodeURIComponent("Recordatorio creado desde J.A.R.V.I.S.");
+  function formatDate(d) {
+    return d.getFullYear() +
+      String(d.getMonth() + 1).padStart(2, "0") +
+      String(d.getDate()).padStart(2, "0") +
+      "T" +
+      String(d.getHours()).padStart(2, "0") +
+      String(d.getMinutes()).padStart(2, "0") +
+      "00";
+  }
 
-      window.location.href = url;
-    });
+  task.reminder = {
+    date: date.value,
+    time: time.value,
+    status: "preparado"
+  };
+
+  saveTasks();
+
+  alert("¡Recordatorio preparado! Confirma el evento en Google Calendar.");
+
+  const url = "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+    "&text=" + encodeURIComponent("J.A.R.V.I.S. - " + task.text) +
+    "&dates=" + formatDate(start) + "/" + formatDate(end) +
+    "&details=" + encodeURIComponent("Recordatorio creado desde J.A.R.V.I.S.");
+
+  window.location.href = url;
+});
+    
 
     reminder.append(schedule, date, time, save);
     list.appendChild(reminder);
