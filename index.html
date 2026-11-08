@@ -361,9 +361,83 @@ save.addEventListener("click", () => {
 
     renderTasks();
 
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    
+if ("serviceWorker" in navigator) {
+  let recargarTrasActualizar = false;
+
+  function mostrarAvisoActualizacion(registration) {
+    if (document.getElementById("jarvisUpdateNotice")) return;
+
+    const aviso = document.createElement("div");
+    aviso.id = "jarvisUpdateNotice";
+    aviso.style.cssText = `
+      position:fixed;
+      bottom:20px;
+      left:12px;
+      right:12px;
+      z-index:99999;
+      padding:18px;
+      border-radius:16px;
+      background:#10243a;
+      color:white;
+      box-shadow:0 5px 25px #0008;
+      text-align:center;
+    `;
+
+    const titulo = document.createElement("strong");
+    titulo.textContent = "✨ Nueva actualización disponible";
+
+    const texto = document.createElement("p");
+    texto.textContent = "Hay una nueva versión de J.A.R.V.I.S.";
+
+    const boton = document.createElement("button");
+    boton.textContent = "Actualizar ahora";
+    boton.style.cssText =
+      "padding:12px 20px;border:0;border-radius:10px;background:#16a085;color:white;font-weight:bold;";
+
+    boton.addEventListener("click", () => {
+      if (!registration.waiting) return;
+      boton.textContent = "Actualizando...";
+      boton.disabled = true;
+      recargarTrasActualizar = true;
+      registration.waiting.postMessage("SKIP_WAITING");
+    });
+
+    aviso.append(titulo, texto, boton);
+    document.body.appendChild(aviso);
+  }
+
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (recargarTrasActualizar) {
+      window.location.reload();
     }
+  });
+
+  navigator.serviceWorker.register("./sw.js").then(registration => {
+    if (registration.waiting && navigator.serviceWorker.controller) {
+      mostrarAvisoActualizacion(registration);
+    }
+
+    registration.addEventListener("updatefound", () => {
+      const nuevo = registration.installing;
+      if (!nuevo) return;
+
+      nuevo.addEventListener("statechange", () => {
+        if (
+          nuevo.state === "installed" &&
+          navigator.serviceWorker.controller
+        ) {
+          mostrarAvisoActualizacion(registration);
+        }
+      });
+    });
+
+    registration.update().catch(() => {});
+  }).catch(error => {
+    console.error("Error actualizando J.A.R.V.I.S.:", error);
+  });
+}
+
   </script>
   
 <section class="panel" id="jarvisChat">
